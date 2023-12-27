@@ -7,4 +7,12 @@ public class BoardMove {
         this.over = over;
         this.to = to;
     }
+    @Override
+    public String toString() {
+        return "BoardMove{" +
+                "from=" + from +
+                ", over=" + over +
+                ", to=" + to +
+                '}';
+    }
 }

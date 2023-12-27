@@ -1,9 +1,20 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class TriangleBoard extends Board {
+public class TriangleBoard implements Board {
     final boolean[] pegBoard;
+    private final int holes;
+    private final int sideLength;
+    private int pegs;
+    public TriangleBoard(TriangleBoard board) {
+        this.pegBoard = board.pegBoard.clone();
+        this.holes = board.holes;
+        this.sideLength = board.sideLength;
+        this.pegs = board.pegs;
+    }
     public TriangleBoard(int sideLength) {
+        this.sideLength = sideLength;
         holes = (sideLength+1)*sideLength/2;
         
         pegBoard = new boolean[holes];
@@ -24,8 +35,7 @@ public class TriangleBoard extends Board {
     private int holeIndex(int row, int col) {
         return row*(row+1)/2 + col;
     }
-    @Override
-    List<BoardMove> getPossibleMoves() {
+    @Override public List<BoardMove> getPossibleMoves() {
         final int[] rowOffsets = new int[]{-1,-1, 0, 0, 1, 1};
         final int[] colOffsets = new int[]{-1, 0,-1, 1, 1, 0};
         List<BoardMove> moves = new ArrayList<>();
@@ -45,17 +55,16 @@ public class TriangleBoard extends Board {
         }
         return moves;
     }
-    @Override
-    boolean doMove(BoardMove move) {
-        if(!isMoveValid(move)) { return false; }
-        pegBoard[move.from] = false;
-        pegBoard[move.over] = false;
-        pegBoard[move.to] = true;
-        pegs--;
-        return true;
+    @Override public Board doMove(BoardMove move) {
+        if(!isMoveValid(move)) { return null; }
+        TriangleBoard clone = new TriangleBoard(this);
+        clone.pegBoard[move.from] = false;
+        clone.pegBoard[move.over] = false;
+        clone.pegBoard[move.to] = true;
+        clone.pegs--;
+        return clone;
     }
-    @Override
-    boolean isMoveValid(BoardMove move) {
+    @Override public boolean isMoveValid(BoardMove move) {
         if(
             !(0 <= move.from && move.from < pegBoard.length) ||
             !(0 <= move.over && move.over < pegBoard.length) ||
@@ -85,5 +94,22 @@ public class TriangleBoard extends Board {
         default:
             return false;
         }
+    }
+    @Override public int getHoles() { return holes; }
+    @Override public int getPegs() { return pegs; }
+    @Override public String toString() {
+        StringBuilder str = new StringBuilder();
+        for(int row = 0; row < sideLength; row++) {
+            str.append(" ".repeat(sideLength - row - 1));
+            for(int col = 0; col <= row; col++) {
+                if(pegBoard[holeIndex(row,col)] == true) {
+                    str.append("X ");
+                } else {
+                    str.append("O ");
+                }
+            }
+            str.append("\n");
+        }
+        return str.toString();
     }
 }
