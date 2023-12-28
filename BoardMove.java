@@ -9,7 +9,7 @@ public class BoardMove {
     }
     @Override
     public String toString() {
-        return "BoardMove{" +
+        return "{" +
                 "from=" + from +
                 ", over=" + over +
                 ", to=" + to +
