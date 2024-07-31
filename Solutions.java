@@ -1,33 +1,37 @@
-import java.util.ArrayList;
-import java.util.Stack;
-import java.util.List;
+import java.util.*;
 
 public class Solutions {
     static List<BoardMove> moveSequence = new ArrayList<>();
     public static void main(String[] args) {
-        Board board = new TriangleBoard(5);
-        tryMoves(board);
-        Stack<List<BoardMove>> stack = new Stack<>();
-//        List<BoardMove> possibleMoves = board.getPossibleMoves();
-//        System.out.println(board);
-//
-//        while(!possibleMoves.isEmpty()) {
-//            board = board.doMove(possibleMoves.get(0));
-//            System.out.println(board);
-//            possibleMoves = board.getPossibleMoves();
-//        }
+        final int BOARD_LEN = 5;
+        
+        int setSize = TriangleBoard.triangleNumber(BOARD_LEN)-1;
+        var sets = new ArrayList<Set<Board>>(setSize);
+        for(int i = 0; i < setSize; i++) {
+            sets.add(new HashSet<>());
+        }
+        sets.get(0).add(new TriangleBoard(BOARD_LEN));
+        for(int i = 0; i < sets.size()-1; i++) {
+            Set<Board> set = sets.get(i);
+            Set<Board> nextSet = sets.get(i+1);
+            for(var board : set) {
+                for(var move : board.getPossibleMoves()) {
+                    nextSet.add(board.clone().doMove(move));
+                }
+            }
+        }
+        for(var set : sets) {
+            System.out.printf("length:%s\n", set.size());
+        }
     }
     static boolean tryMoves(Board board) {
         List<BoardMove> possibleMoves = board.getPossibleMoves();
         if(possibleMoves.isEmpty()) {
             if(board.getPegs() == 1) {
-//                System.out.println("move sequence: " + moveSequence);
-//                System.out.println("pegs remaining: " + board.getPegs() + "\n" + board);
-                
                 Board solutionBoard = new TriangleBoard(5);
                 System.out.println(solutionBoard);
                 for(BoardMove move : moveSequence) {
-                    solutionBoard = solutionBoard.doMove(move);
+                    solutionBoard.doMove(move);
                     System.out.println(move +"\n"+solutionBoard);
                 }
                 System.exit(0);
@@ -35,11 +39,11 @@ public class Solutions {
         } else {
             for(BoardMove move : possibleMoves) {
                 moveSequence.add(move);
-                tryMoves(board.doMove(move));
+                var clone = board.clone().doMove(move);
+                tryMoves(clone);
                 moveSequence.remove(move);
             }
         }
         return false;
     }
-//    public static v
 }

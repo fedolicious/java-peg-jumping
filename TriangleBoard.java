@@ -7,7 +7,10 @@ public class TriangleBoard implements Board {
     private final int holes;
     private final int sideLength;
     private int pegs;
-    public TriangleBoard(TriangleBoard board) {
+    
+    static public int triangleNumber(int x) { return (x+1)*x/2; }
+    
+    private TriangleBoard(TriangleBoard board) {
         this.pegBoard = board.pegBoard.clone();
         this.holes = board.holes;
         this.sideLength = board.sideLength;
@@ -15,7 +18,7 @@ public class TriangleBoard implements Board {
     }
     public TriangleBoard(int sideLength) {
         this.sideLength = sideLength;
-        holes = (sideLength+1)*sideLength/2;
+        holes = triangleNumber(sideLength);
         
         pegBoard = new boolean[holes];
         pegBoard[0] = false;
@@ -25,15 +28,33 @@ public class TriangleBoard implements Board {
         
         pegs = holes-1;
     }
+    
     private int holeRow(int index) {
         return (int) (-0.5 + Math.sqrt(0.25 + 2*index));
     }
     private int holeCol(int index) {
         int row = holeRow(index);
-        return index - row*(row+1)/2;
+        return index - triangleNumber(row);
     }
     private int holeIndex(int row, int col) {
-        return row*(row+1)/2 + col;
+        return triangleNumber(row) + col;
+    }
+    
+    @Override public boolean equals(Object o) {
+        if(!(o instanceof TriangleBoard other)) { return false; }
+        return Arrays.equals(pegBoard, other.pegBoard);
+    }
+    @Override public int hashCode() {
+        int hash = 0;
+        for(var peg : pegBoard) {
+            hash <<= 1;
+            hash |= peg? 1:0;
+        }
+        return hash;
+    }
+    
+    @Override public Board clone() {
+        return new TriangleBoard(this);
     }
     @Override public List<BoardMove> getPossibleMoves() {
         final int[] rowOffsets = new int[]{-1,-1, 0, 0, 1, 1};
@@ -56,13 +77,12 @@ public class TriangleBoard implements Board {
         return moves;
     }
     @Override public Board doMove(BoardMove move) {
-        if(!isMoveValid(move)) { return null; }
-        TriangleBoard clone = new TriangleBoard(this);
-        clone.pegBoard[move.from] = false;
-        clone.pegBoard[move.over] = false;
-        clone.pegBoard[move.to] = true;
-        clone.pegs--;
-        return clone;
+        assert isMoveValid(move);
+        pegBoard[move.from] = false;
+        pegBoard[move.over] = false;
+        pegBoard[move.to] = true;
+        pegs--;
+        return this;
     }
     @Override public boolean isMoveValid(BoardMove move) {
         if(
@@ -83,17 +103,13 @@ public class TriangleBoard implements Board {
         final int colDiff1 = holeCol(move.from) - midCol;
         final int colDiff2 = midCol - holeCol(move.to);
         if(colDiff1 != colDiff2) { return false; }
-    
-        switch(rowDiff1) {
-        case 1:
-            return colDiff1 == 1 || colDiff1 == 0;
-        case -1:
-            return colDiff1 == -1 || colDiff1 == 0;
-        case 0:
-            return colDiff1 == 1 || colDiff1 == -1;
-        default:
-            return false;
-        }
+        
+        return switch (rowDiff1) {
+            case 1 -> colDiff1 == 1 || colDiff1 == 0;
+            case -1 -> colDiff1 == -1 || colDiff1 == 0;
+            case 0 -> colDiff1 == 1 || colDiff1 == -1;
+            default -> false;
+        };
     }
     @Override public int getHoles() { return holes; }
     @Override public int getPegs() { return pegs; }
