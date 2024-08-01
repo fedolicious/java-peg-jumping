@@ -1,10 +1,17 @@
+import java.awt.*;
 import java.util.List;
 
-public abstract interface Board {
+public interface Board {
     Board clone();
+    
+    void draw(Graphics g, int x, int y);
+    static int drawnWidth() { return 19; }
+    static int drawnHeight() { return 19; }
+    
     List<BoardMove> getPossibleMoves();
     Board doMove(BoardMove move);
     boolean isMoveValid(BoardMove move);
+    
     int getHoles();
     int getPegs();
 }

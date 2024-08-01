@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,8 +54,23 @@ public class TriangleBoard implements Board {
         return hash;
     }
     
-    @Override public Board clone() {
+    @Override public TriangleBoard clone() {
         return new TriangleBoard(this);
+    }
+    
+    @Override public void draw(Graphics g, int x, int y) {
+        for(int i = 0; i < pegBoard.length; i++) {
+            if(pegBoard[i]) {
+                g.drawRect(
+                    x + holeCol(i)*4 - holeRow(i)*2 + sideLength*2 - 2,
+                    y + holeRow(i)*4,
+                2, 2);
+            } else {
+                int pointX = x + holeCol(i)*4 - holeRow(i)*2 + sideLength*2 - 1;
+                int pointY = y + holeRow(i)*4 + 1;
+                g.drawLine(pointX, pointY, pointX, pointY);
+            }
+        }
     }
     @Override public List<BoardMove> getPossibleMoves() {
         final int[] rowOffsets = new int[]{-1,-1, 0, 0, 1, 1};
@@ -76,7 +92,7 @@ public class TriangleBoard implements Board {
         }
         return moves;
     }
-    @Override public Board doMove(BoardMove move) {
+    @Override public TriangleBoard doMove(BoardMove move) {
         assert isMoveValid(move);
         pegBoard[move.from] = false;
         pegBoard[move.over] = false;
@@ -111,6 +127,7 @@ public class TriangleBoard implements Board {
             default -> false;
         };
     }
+    
     @Override public int getHoles() { return holes; }
     @Override public int getPegs() { return pegs; }
     @Override public String toString() {
@@ -119,9 +136,9 @@ public class TriangleBoard implements Board {
             str.append(" ".repeat(sideLength - row - 1));
             for(int col = 0; col <= row; col++) {
                 if(pegBoard[holeIndex(row,col)] == true) {
-                    str.append("X ");
-                } else {
                     str.append("O ");
+                } else {
+                    str.append("X ");
                 }
             }
             str.append("\n");
