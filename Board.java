@@ -8,6 +8,9 @@ public interface Board {
     static int drawnWidth() { return 19; }
     static int drawnHeight() { return 19; }
     
+    boolean equals(Object other);
+    int hashCode();
+    
     List<BoardMove> getPossibleMoves();
     Board doMove(BoardMove move);
     boolean isMoveValid(BoardMove move);
